@@ -2,12 +2,6 @@
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
-interface User {
-  userId: string;
-  username: string;
-  email: string;
-}
-
 export default function HomePage() {
   const router = useRouter();
   const { user, loading } = useAuth();

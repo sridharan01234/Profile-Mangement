@@ -3,7 +3,11 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { JWTPayload } from "@/types/jwt";
+
+interface JWTPayload {
+  username: string;
+  exp: number;
+}
 
 interface AuthContextType {
   user: JWTPayload | null;

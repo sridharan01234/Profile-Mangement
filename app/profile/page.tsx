@@ -20,7 +20,6 @@ export default function Dashboard() {
     education: "",
     certifications: "",
   });
-  const [inputValue, setInputValue] = useState("");
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
