@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from "react";
+
 export interface Skill {
   name: string;
   id: string;
@@ -71,4 +73,44 @@ export interface CompletionPercentages {
   work: number;
   skills: number;
   total: number;
+}
+
+export interface WorkSectionProps {
+  sectionIndex: number;
+  value: Experience;
+  onChange: (index: number, field: keyof Experience, value: any) => void;
+  loading: boolean;
+  setLoading: Dispatch<SetStateAction<boolean>>;
+}
+
+export interface EducationSectionProps {
+  sectionIndex: number;
+  value: any;
+  onChange: (sectionIndex: number, field: string, value: any) => void;
+  loading: boolean;
+  setLoading: Dispatch<SetStateAction<boolean>>;
+}
+
+export interface SkillSectionProps {
+  sectionIndex: number;
+  value: any[];
+  onChange: (skills: any[], index: number) => void;
+  loading: boolean;
+  setLoading: Dispatch<SetStateAction<boolean>>;
+}
+
+export interface PersonalFormProps {
+  formData: {
+    name: string;
+    phone: string;
+    address: string;
+    email: string;
+  };
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  loading: boolean;
+}
+
+export interface selectInput {
+  id: string;
+  name: string;
 }

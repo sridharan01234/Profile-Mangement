@@ -3,19 +3,15 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Select from "react-select";
-import { Experience } from "@/types";
+import { WorkSectionProps } from "@/types";
 import dayjs from "dayjs";
-
-interface WorkSectionProps {
-  sectionIndex: number;
-  value: Experience;
-  onChange: (index: number, field: keyof Experience, value: any) => void;
-}
 
 export default function WorkSection({
   sectionIndex,
   value,
   onChange,
+  setLoading,
+  loading,
 }: WorkSectionProps) {
   const [companies, setCompanies] = useState<
     { value: string; label: string }[]
@@ -27,6 +23,7 @@ export default function WorkSection({
   }, []);
 
   const fetchCompanies = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/profile/work");
       const data = await response.json();
@@ -37,8 +34,17 @@ export default function WorkSection({
       setCompanies(options);
     } catch (error) {
       console.error("Failed to fetch companies:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
 
   return (
     <div className="grid md:grid-cols-2 gap-6">

@@ -143,6 +143,7 @@ export default function Dashboard() {
     <PersonalForm
       formData={formData}
       handleInputChange={handlePersonalFormInputChange}
+      loading={loading}
     />
   );
 
@@ -202,6 +203,8 @@ export default function Dashboard() {
             sectionIndex={index}
             value={experience}
             onChange={handleExperienceChnage}
+            setLoading={setLoading}
+            loading={loading}
           />
         </div>
       ))}
@@ -233,6 +236,8 @@ export default function Dashboard() {
             sectionIndex={index}
             value={formData.education[index]}
             onChange={handleEducationChange}
+            setLoading={setLoading}
+            loading={loading}
           />
         </div>
       ))}
@@ -254,6 +259,8 @@ export default function Dashboard() {
           sectionIndex={0}
           value={formData.skills[0]?.skillSet ?? []}
           onChange={handleSkillChange}
+          setLoading={setLoading}
+          loading={loading}
         />
       </div>
     </div>
@@ -479,13 +486,6 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center items-start py-8">
       <Toaster />

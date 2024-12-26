@@ -1,17 +1,18 @@
-interface PersonalFormProps {
-  formData: {
-    name: string;
-    phone: string;
-    address: string;
-    email: string;
-  };
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+import { PersonalFormProps } from "@/types";
 
 const PersonalForm: React.FC<PersonalFormProps> = ({
   formData,
   handleInputChange,
+  loading,
 }) => {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <div className="space-y-2">
