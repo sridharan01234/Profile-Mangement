@@ -26,6 +26,8 @@ export async function POST(req: Request) {
       },
     });
 
+    console.log(user);
+
     if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -78,7 +80,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Error during login:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

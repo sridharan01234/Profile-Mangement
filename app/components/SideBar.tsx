@@ -1,60 +1,83 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { ChevronDown, ChevronRight, User, Briefcase } from "lucide-react";
 
 type SidebarProps = {
   setActiveTab: (tab: string) => void;
   setProfessionalActiveSection: (section: string) => void;
+  activeTab: string;
+  activeSection: string;
 };
 
 const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab,
   setProfessionalActiveSection,
+  activeTab,
+  activeSection
 }) => {
-  const [activeMainTab, setActiveMainTab] = useState("personal");
-  const [activeSection, setActiveSection] = useState("Education");
   const [expandedItems, setExpandedItems] = useState(["personal"]);
 
-  const menuItems = [
-    {
-      id: 1,
-      label: "personal",
-      icon: <User className="w-5 h-5" />,
-      completed: true,
-    },
-    {
-      id: 2,
-      label: "professional",
-      icon: <Briefcase className="w-5 h-5" />,
-      completed: false,
-      subItems: [
-        { id: "edu", label: "Education", completed: false },
-        { id: "work", label: "Work history", completed: false },
-        { id: "skills", label: "Skills", completed: false },
-      ],
-    },
-  ];
+  const menuItems = useMemo(
+    () => [
+      {
+        id: 1,
+        label: "personal",
+        icon: <User className="w-5 h-5" />,
+        completed: false,
+        percetage: 30,
+      },
+      {
+        id: 2,
+        label: "professional",
+        icon: <Briefcase className="w-5 h-5" />,
+        completed: false,
+        percentage: 70,
+        subItems: [
+          { id: "edu", label: "Education", completed: false, percentage: 25 },
+          {
+            id: "work",
+            label: "Work history",
+            completed: false,
+            percentage: 25,
+          },
+          { id: "skills", label: "Skills", completed: false, percentage: 20 },
+        ],
+      },
+    ],
+    []
+  );
 
   const completionPercentage = useMemo(() => {
-    let totalItems = menuItems.length;
-    let completedItems = 0;
-    menuItems.forEach((item) => {
-      if (item.subItems) {
-        totalItems += item.subItems.length - 1;
-        completedItems += item.subItems.filter(
-          (subItem) => subItem.completed
-        ).length;
-      }
-      if (item.completed) completedItems++;
-    });
-    return Math.round((completedItems / totalItems) * 100);
+    const calculateCompletion = (items) => {
+      const total = items.length;
+      const completed = items.filter((item) => item.completed).length;
+
+      const subItemResults = items
+        .filter((item) => item.subItems)
+        .reduce(
+          (acc, item) => {
+            const subCompletion = calculateCompletion(item.subItems);
+            return {
+              total: acc.total + subCompletion.total,
+              completed: acc.completed + subCompletion.completed,
+            };
+          },
+          { total: 0, completed: 0 }
+        );
+
+      return {
+        total: total + subItemResults.total,
+        completed: completed + subItemResults.completed,
+      };
+    };
+
+    const { total, completed } = calculateCompletion(menuItems);
+    return Math.round((completed / total) * 100);
   }, [menuItems]);
 
   const handleMainTabClick = (label: string) => {
-    setActiveMainTab(label);
     setActiveTab(label);
     if (label === "professional") {
       setExpandedItems(["professional"]);
-      setActiveSection("Education");
       setProfessionalActiveSection("Education");
     } else {
       setExpandedItems([]);
@@ -63,11 +86,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleSectionClick = (section: string) => {
     setProfessionalActiveSection(section);
-    setActiveSection(section);
   };
 
+
   const toggleExpanded = (label: string) => {
-    if (activeMainTab === "professional") {
+    if (activeTab === "professional") {
       setExpandedItems((prev) => (prev.includes(label) ? [] : [label]));
     }
   };
@@ -82,13 +105,13 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div
               onClick={() => {
                 handleMainTabClick(item.label);
-                if (activeMainTab === "professional") {
+                if (activeTab === "professional") {
                   toggleExpanded(item.label);
                 }
               }}
               className={`flex items-center p-3 rounded-lg transition-all cursor-pointer
                 ${
-                  activeMainTab === item.label
+                  activeTab === item.label
                     ? "bg-blue-100"
                     : expandedItems.includes(item.label)
                     ? "bg-blue-50"
@@ -97,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <span
                 className={`mr-3 ${
-                  activeMainTab === item.label
+                  activeTab === item.label
                     ? "text-blue-600"
                     : expandedItems.includes(item.label)
                     ? "text-blue-500"
@@ -108,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </span>
               <span
                 className={`flex-grow ${
-                  activeMainTab === item.label
+                  activeTab === item.label
                     ? "text-blue-700 font-medium"
                     : expandedItems.includes(item.label)
                     ? "text-blue-600"
