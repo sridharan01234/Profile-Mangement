@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     if (!username || !password) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     if (!isPasswordValid) {
       return NextResponse.json(
         { error: "Invalid credentials" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         email: user.email,
       },
       process.env.JWT_SECRET!,
-      { expiresIn: "24h" }
+      { expiresIn: "24h" },
     );
 
     // Create response with HTTP-only cookie
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
           username: user.username,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
 
     // Set HTTP-only cookie
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     console.error("Error during login:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

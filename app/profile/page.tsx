@@ -22,7 +22,7 @@ const calculatePersonalCompletion = (formData: FormData) => {
   type PersonalField = (typeof personalFields)[number];
 
   const filledFields = personalFields.filter((field: PersonalField) =>
-    Boolean(formData[field])
+    Boolean(formData[field]),
   ).length;
 
   return Math.round((filledFields / personalFields.length) * 100);
@@ -31,7 +31,7 @@ const calculatePersonalCompletion = (formData: FormData) => {
 const calculateEducationCompletion = (education: Array<Education>) => {
   if (!education.length) return 0;
   const filledEducations = education.filter(
-    (edu) => edu.degree && edu.institution
+    (edu) => edu.degree && edu.institution,
   ).length;
   return Math.round((filledEducations / education.length) * 100);
 };
@@ -39,7 +39,7 @@ const calculateEducationCompletion = (education: Array<Education>) => {
 const calculateWorkCompletion = (experience: Array<Experience>) => {
   if (!experience.length) return 0;
   const filledExperience = experience.filter(
-    (exp) => exp.company && exp.position && exp.startDate && exp.endDate
+    (exp) => exp.company && exp.position && exp.startDate && exp.endDate,
   ).length;
   return Math.round((filledExperience / experience.length) * 100);
 };
@@ -147,7 +147,7 @@ export default function Dashboard() {
   );
 
   const handlePersonalFormInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -159,13 +159,13 @@ export default function Dashboard() {
   function handleExperienceChnage(
     sectionIndex: number,
     field: string,
-    value: FormData
+    value: FormData,
   ) {
     console.log(field, value);
     setFormData((prev) => ({
       ...prev,
       experience: prev.experience.map((section, index) =>
-        index === sectionIndex ? { ...section, [field]: value } : section
+        index === sectionIndex ? { ...section, [field]: value } : section,
       ),
     }));
   }
@@ -173,13 +173,13 @@ export default function Dashboard() {
   function handleEducationChange(
     sectionIndex: number,
     field: string,
-    value: FormData
+    value: FormData,
   ) {
     console.log(field, value);
     setFormData((prev) => ({
       ...prev,
       education: prev.education.map((section, index) =>
-        index === sectionIndex ? { ...section, [field]: value } : section
+        index === sectionIndex ? { ...section, [field]: value } : section,
       ),
     }));
   }
@@ -249,13 +249,13 @@ export default function Dashboard() {
 
   const renderSkillsSection = () => (
     <div className="space-y-6">
-        <div className="relative border p-4 rounded-lg">
-          <SkillSection
-            sectionIndex={0}
-            value={formData.skills[0]?.skillSet ?? []}
-            onChange={handleSkillChange}
-          />
-        </div>
+      <div className="relative border p-4 rounded-lg">
+        <SkillSection
+          sectionIndex={0}
+          value={formData.skills[0]?.skillSet ?? []}
+          onChange={handleSkillChange}
+        />
+      </div>
     </div>
   );
 
@@ -265,7 +265,7 @@ export default function Dashboard() {
       skills: prev.skills.map((section, index) =>
         index === sectionIndex
           ? { ...section, skillSet: selectedSkills }
-          : section
+          : section,
       ),
     }));
   };
@@ -382,7 +382,7 @@ export default function Dashboard() {
       const skills = calculateSkillsCompletion(formData.skills || []);
 
       const total = Math.round(
-        (personal * 30 + education * 25 + work * 30 + skills * 15) / 100
+        (personal * 30 + education * 25 + work * 30 + skills * 15) / 100,
       );
 
       return {

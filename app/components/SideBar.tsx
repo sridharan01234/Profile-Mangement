@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
     ],
-    []
+    [],
   );
 
   const handleSectionClick = (section: string) => {
@@ -68,8 +68,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   activeTab === item.label
                     ? "bg-blue-100"
                     : expandedItems.includes(item.label)
-                    ? "bg-blue-50"
-                    : "hover:bg-gray-50"
+                      ? "bg-blue-50"
+                      : "hover:bg-gray-50"
                 }`}
             >
               <span
@@ -77,8 +77,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   activeTab === item.label
                     ? "text-blue-600"
                     : expandedItems.includes(item.label)
-                    ? "text-blue-500"
-                    : "text-gray-500"
+                      ? "text-blue-500"
+                      : "text-gray-500"
                 }`}
               >
                 {item.icon}
@@ -88,8 +88,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   activeTab === item.label
                     ? "text-blue-700 font-medium"
                     : expandedItems.includes(item.label)
-                    ? "text-blue-600"
-                    : "text-gray-700"
+                      ? "text-blue-600"
+                      : "text-gray-700"
                 }`}
               >
                 {item.label}

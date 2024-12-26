@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } },
 ) {
   try {
     const profile = await prisma.profile.findUnique({
@@ -52,14 +52,14 @@ export async function GET(
     console.error("Error fetching profile:", error);
     return NextResponse.json(
       { error: "Failed to fetch profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } },
 ) {
   try {
     const data = await request.json();
@@ -95,14 +95,14 @@ export async function PUT(
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to update profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } },
 ) {
   try {
     await prisma.profile.delete({
@@ -113,15 +113,17 @@ export async function DELETE(
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to delete profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 function calculatePersonalInfoComplete(
-  data: Partial<CreateProfileDto>
+  data: Partial<CreateProfileDto>,
 ): number {
   const fields = ["address", "phoneNumber", "bio"];
-  const filledFields = fields.filter((field: string) => !!(data as any)[field]).length;
+  const filledFields = fields.filter(
+    (field: string) => !!(data as any)[field],
+  ).length;
   return (filledFields / fields.length) * 100;
 }

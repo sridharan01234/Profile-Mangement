@@ -44,7 +44,7 @@ const degrees = uniqueArray([
         "Chemistry",
         "Biology",
         "Economics",
-      ])}`
+      ])}`,
   ),
 ]);
 
@@ -65,7 +65,7 @@ const institutions = uniqueArray([
         "Institute of",
         "College of",
         "School of",
-      ])} ${faker.location.city()}`
+      ])} ${faker.location.city()}`,
   ),
 ]);
 

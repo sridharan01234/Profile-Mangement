@@ -22,10 +22,7 @@ export default function SkillSection({
     try {
       const response = await fetch("/api/profile/skills");
       const data = await response.json();
-      let options = data.map((skill: {
-        id: string;
-        name: string;
-      }) => ({
+      let options = data.map((skill: { id: string; name: string }) => ({
         value: skill.id,
         label: skill.name,
       }));
@@ -41,7 +38,9 @@ export default function SkillSection({
         value={value}
         isMulti={true}
         options={skillOptions}
-        onChange={(selectedOptions: any) => onChange(selectedOptions, sectionIndex)}
+        onChange={(selectedOptions: any) =>
+          onChange(selectedOptions, sectionIndex)
+        }
         className="mb-4"
       />
     </>
