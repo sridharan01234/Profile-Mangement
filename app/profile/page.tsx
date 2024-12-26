@@ -257,6 +257,7 @@ export default function Dashboard() {
       return;
     }
     toast.success("Profile Updated succesfully");
+    return;
     try {
       const response = await fetch("/api/profiles", {
         method: "POST",
