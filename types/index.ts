@@ -11,13 +11,13 @@ export interface Option {
 export interface Education {
   degree: string;
   institution: string;
-  year: string;
 }
 
 export interface Experience {
   company: string;
   position: string;
-  duration: string;
+  startDate: string;
+  endDate: string;
 }
 
 export interface Skills {
@@ -29,9 +29,9 @@ export interface FormData {
   phone: string;
   address: string;
   email: string;
-  experience: Experience[];
-  skills: Skills[];
-  education: Education[];
+  experience: Array<Experience>;
+  skills: Array<Skills>;
+  education: Array<Education>;
 }
 
 export interface CreateProfileDto {
@@ -63,4 +63,12 @@ export interface JWTPayload {
   email: string;
   iat: number;
   exp: number;
+}
+
+export interface CompletionPercentages {
+  personal: number;
+  education: number;
+  work: number;
+  skills: number;
+  total: number;
 }

@@ -3,11 +3,13 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Select from "react-select";
+import { Experience } from "@/types";
+import dayjs from "dayjs";
 
 interface WorkSectionProps {
   sectionIndex: number;
-  value: any;
-  onChange: (seactionIndex: number, field: string, value: any) => void;
+  value: Experience;
+  onChange: (index: number, field: keyof Experience, value: any) => void;
 }
 
 export default function WorkSection({
@@ -44,11 +46,14 @@ export default function WorkSection({
         <label htmlFor="company" className="block font-medium">
           Company
         </label>
-        <Select
-          value={value.company}
+        <Select<{
+          value: string;
+          label: string;
+        }>
+          value={companies.find((option) => option.value === value.company)}
           options={companies}
           onChange={(selectedOption) =>
-            onChange(sectionIndex, "company", selectedOption)
+            onChange(sectionIndex, "company", selectedOption?.value || "")
           }
         />
       </div>
@@ -75,19 +80,20 @@ export default function WorkSection({
           </label>
           <DatePicker
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
-            value={value.startDate}
+            value={value.startDate ? dayjs(value.startDate) : null}
             onChange={(date) => onChange(sectionIndex, "startDate", date)}
+            maxDate={value.endDate ? dayjs(value.endDate) : undefined}
           />
         </div>
-
         <div className="space-y-2">
           <label htmlFor="endDate" className="block font-medium">
             End Date
           </label>
           <DatePicker
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
-            value={value.endDate}
+            value={value.endDate ? dayjs(value.endDate) : null}
             onChange={(date) => onChange(sectionIndex, "endDate", date)}
+            minDate={value.startDate ? dayjs(value.startDate) : undefined}
           />
         </div>
       </LocalizationProvider>

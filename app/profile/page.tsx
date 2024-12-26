@@ -9,24 +9,26 @@ import SkillSection from "@/app/components/SkillSection";
 import { Plus, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
+import {
+  FormData,
+  Education,
+  CompletionPercentages,
+  Experience,
+  Skills,
+} from "@/types";
 
-interface CompletionPercentages {
-  personal: number;
-  education: number;
-  work: number;
-  skills: number;
-  total: number;
-}
+const calculatePersonalCompletion = (formData: FormData) => {
+  const personalFields = ["name", "phone", "address", "email"] as const;
+  type PersonalField = (typeof personalFields)[number];
 
-const calculatePersonalCompletion = (formData) => {
-  const personalFields = ["name", "phone", "address", "email"];
-  const filledFields = personalFields.filter(
-    (field) => !!formData[field]
+  const filledFields = personalFields.filter((field: PersonalField) =>
+    Boolean(formData[field])
   ).length;
+
   return Math.round((filledFields / personalFields.length) * 100);
 };
 
-const calculateEducationCompletion = (education) => {
+const calculateEducationCompletion = (education: Array<Education>) => {
   if (!education.length) return 0;
   const filledEducations = education.filter(
     (edu) => edu.degree && edu.institution
@@ -34,7 +36,7 @@ const calculateEducationCompletion = (education) => {
   return Math.round((filledEducations / education.length) * 100);
 };
 
-const calculateWorkCompletion = (experience) => {
+const calculateWorkCompletion = (experience: Array<Experience>) => {
   if (!experience.length) return 0;
   const filledExperience = experience.filter(
     (exp) => exp.company && exp.position && exp.startDate && exp.endDate
@@ -42,7 +44,7 @@ const calculateWorkCompletion = (experience) => {
   return Math.round((filledExperience / experience.length) * 100);
 };
 
-const calculateSkillsCompletion = (skills) => {
+const calculateSkillsCompletion = (skills: Array<Skills>) => {
   if (!skills.length) return 0;
   return skills.some((skill) => skill.skillSet && skill.skillSet.length > 0)
     ? 100
@@ -52,21 +54,20 @@ const calculateSkillsCompletion = (skills) => {
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<string>("personal");
   const [activeSection, setActiveSection] = useState<string>("");
-  const [workSections, setWorkSections] = useState([]);
-  const [educationSections, setEducationSections] = useState([]);
-  const [skillSections] = useState([0]);
+  const [workSections, setWorkSections] = useState<Experience[]>([]);
+  const [educationSections, setEducationSections] = useState<Education[]>([]);
+  const [skillSections] = useState<Skills[]>([]);
   const [expandedItems, setExpandedItems] = useState<string[]>(["personal"]);
-  const [completion, setCompletion] = useState(0);
   const { user, loading, setLoading } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
     address: "",
     email: "",
-    experience: [{ company: "", position: "", duration: "" }],
+    experience: [{ company: "", position: "", startDate: "", endDate: "" }],
     skills: [{ skillSet: [] }],
-    education: [{ degree: "", institution: "", year: "" }],
+    education: [{ degree: "", institution: "" }],
   });
 
   useEffect(() => {
@@ -76,6 +77,7 @@ export default function Dashboard() {
   const getProfileData = async () => {
     setLoading(true);
     try {
+      if (!user) return;
       const response = await fetch(`api/profiles/${user.userId}`);
       const profileData = await response.json();
 
@@ -92,21 +94,32 @@ export default function Dashboard() {
   };
 
   const addWorkSection = () => {
-    setWorkSections([...workSections, workSections.length]);
-    setFormData((prev) => ({
+    const newExperience: Experience = {
+      company: "",
+      position: "",
+      startDate: "",
+      endDate: "",
+    };
+    setWorkSections((prev: Experience[]) => [...prev, newExperience]);
+    setFormData((prev: FormData) => ({
       ...prev,
-      experience: [
-        ...prev.experience,
-        { company: "", position: "", duration: "" },
-      ],
+      experience: [...prev.experience, newExperience],
     }));
   };
 
   const addEducationSection = () => {
-    setEducationSections([...educationSections, educationSections.length]);
+    const newEducation: Education = {
+      degree: "",
+      institution: "",
+    };
+
+    // Update education sections
+    setEducationSections((prev) => [...prev, newEducation]);
+
+    // Update form data
     setFormData((prev) => ({
       ...prev,
-      education: [...prev.education, { degree: "", institution: "", year: "" }],
+      education: [...prev.education, newEducation],
     }));
   };
 
@@ -143,7 +156,11 @@ export default function Dashboard() {
     }));
   };
 
-  function handleExperienceChnage(sectionIndex, field, value) {
+  function handleExperienceChnage(
+    sectionIndex: number,
+    field: string,
+    value: FormData
+  ) {
     console.log(field, value);
     setFormData((prev) => ({
       ...prev,
@@ -153,7 +170,11 @@ export default function Dashboard() {
     }));
   }
 
-  function handleEducationChange(sectionIndex, field, value) {
+  function handleEducationChange(
+    sectionIndex: number,
+    field: string,
+    value: FormData
+  ) {
     console.log(field, value);
     setFormData((prev) => ({
       ...prev,
@@ -165,7 +186,7 @@ export default function Dashboard() {
 
   const renderWorkSection = () => (
     <div className="space-y-6">
-      {workSections.map((_, index) => (
+      {formData.experience.map((experience, index) => (
         <div key={index} className="relative border p-4 rounded-lg">
           {index >= 0 && (
             <button
@@ -177,8 +198,9 @@ export default function Dashboard() {
             </button>
           )}
           <WorkSection
+            key={index}
             sectionIndex={index}
-            value={formData.experience[index]}
+            value={experience}
             onChange={handleExperienceChnage}
           />
         </div>
@@ -227,15 +249,13 @@ export default function Dashboard() {
 
   const renderSkillsSection = () => (
     <div className="space-y-6">
-      {skillSections.map((_, index) => (
-        <div key={index} className="relative border p-4 rounded-lg">
+        <div className="relative border p-4 rounded-lg">
           <SkillSection
-            sectionIndex={index}
-            value={formData.skills[index].skillSet}
+            sectionIndex={0}
+            value={formData.skills[0]?.skillSet ?? []}
             onChange={handleSkillChange}
           />
         </div>
-      ))}
     </div>
   );
 
@@ -304,7 +324,7 @@ export default function Dashboard() {
           });
           return false;
         }
-        const { company, position } = formData.experience[0];
+        const { company = "", position = "" } = formData.experience[0] ?? {};
         if (!company || !position) {
           toast.error("Please fill all the fields", {
             duration: 1000,
@@ -320,7 +340,7 @@ export default function Dashboard() {
           });
           return false;
         }
-        const { degree, institution } = formData.education[0];
+        const { degree = "", institution = "" } = formData.education[0] ?? {};
         if (!degree || !institution) {
           toast.error("Please fill all the fields", {
             duration: 1000,
@@ -336,7 +356,7 @@ export default function Dashboard() {
           });
           return false;
         }
-        const { skillSet } = formData.skills[0];
+        const { skillSet = "" } = formData.skills[0] ?? {};
         if (!skillSet || skillSet.length === 0) {
           toast.error("Please fill all the fields", {
             duration: 1000,
@@ -386,7 +406,6 @@ export default function Dashboard() {
       }
 
       if (activeTab === "personal") {
-        setCompletion(completionPercentages.education);
         setActiveTab("professional");
         setActiveSection("Education");
         toggleExpanded("professional");
@@ -397,19 +416,16 @@ export default function Dashboard() {
         switch (activeSection) {
           case "Education": {
             const nextCompletion = completionPercentages.work;
-            setCompletion(nextCompletion);
             setActiveSection("Work history");
             break;
           }
           case "Work history": {
             const nextCompletion = completionPercentages.skills;
-            setCompletion(nextCompletion);
             setActiveSection("Skills");
             break;
           }
           case "Skills": {
             setActiveSection("Skills");
-            setCompletion(completionPercentages.total);
             handleSubmit(e);
             break;
           }
@@ -463,71 +479,70 @@ export default function Dashboard() {
     }
   };
 
-  if (loading)
-  {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
       </div>
     );
   }
-    return (
-      <div className="min-h-screen bg-gray-50 flex justify-center items-start py-8">
-        <Toaster />
-        <div className="container max-w-6xl mx-auto flex flex-col md:flex-row gap-6 p-4">
-          {/* Sidebar */}
+  return (
+    <div className="min-h-screen bg-gray-50 flex justify-center items-start py-8">
+      <Toaster />
+      <div className="container max-w-6xl mx-auto flex flex-col md:flex-row gap-6 p-4">
+        {/* Sidebar */}
 
-          <div className="space-y-6">
-            <Sidebar
-              setProfessionalActiveSection={setActiveSection}
-              activeTab={activeTab}
-              activeSection={activeSection}
-              expandedItems={expandedItems}
-              toggleExpanded={toggleExpanded}
-              completionPercentage={completionPercentages.total}
-            />
-          </div>
+        <div className="space-y-6">
+          <Sidebar
+            setProfessionalActiveSection={setActiveSection}
+            activeTab={activeTab}
+            activeSection={activeSection}
+            expandedItems={expandedItems}
+            toggleExpanded={toggleExpanded}
+            completionPercentage={completionPercentages.total}
+          />
+        </div>
 
-          {/* Main Content */}
-          <div className="flex-1 max-w-3xl">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-bold mb-8">
-                {activeTab === "personal"
-                  ? "Personal Information"
-                  : "Professional Information"}
-              </h2>
+        {/* Main Content */}
+        <div className="flex-1 max-w-3xl">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-2xl font-bold mb-8">
+              {activeTab === "personal"
+                ? "Personal Information"
+                : "Professional Information"}
+            </h2>
 
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                {activeTab === "personal"
-                  ? renderPersonalForm()
-                  : renderProfessionalForm()}
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {activeTab === "personal"
+                ? renderPersonalForm()
+                : renderProfessionalForm()}
 
-                <div className="flex justify-end gap-4 pt-4">
-                  {/* Only show Back button if not on the first screen */}
-                  {activeTab !== "personal" && (
-                    <button
-                      type="button"
-                      onClick={moveToPreviousSection}
-                      className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      Back
-                    </button>
-                  )}
+              <div className="flex justify-end gap-4 pt-4">
+                {/* Only show Back button if not on the first screen */}
+                {activeTab !== "personal" && (
                   <button
                     type="button"
-                    onClick={moveToNextSection}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    onClick={moveToPreviousSection}
+                    className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    {/* Change button text based on section */}
-                    {activeTab === "professional" && activeSection === "Skills"
-                      ? "Submit"
-                      : "Next"}
+                    Back
                   </button>
-                </div>
-              </form>
-            </div>
+                )}
+                <button
+                  type="button"
+                  onClick={moveToNextSection}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {/* Change button text based on section */}
+                  {activeTab === "professional" && activeSection === "Skills"
+                    ? "Submit"
+                    : "Next"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
 }
