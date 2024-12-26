@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { CreateProfileDto } from "@/types";
+import { NextRequest } from "next/server";
 
 const prisma = new PrismaClient();
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
   try {
@@ -18,15 +19,21 @@ export async function GET(
       },
     });
 
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    const user = await prisma.user.findUnique({
+      where: { id: params.userId },
+    });
+
+    if (!profile || !user) {
+      return new Response(JSON.stringify({ error: "Profile not found" }), {
+        status: 404,
+      });
     }
 
     const formattedProfile = {
-      name: profile.name || "",
+      name: user.name || "",
       phone: profile.phoneNumber || "",
       address: profile.address || "",
-      email: profile.email || "",
+      email: user.email || "",
       experience: profile.workHistory.map((work) => ({
         company: work.companyName || "",
         position: work.jobTitle || "",
@@ -115,6 +122,6 @@ function calculatePersonalInfoComplete(
   data: Partial<CreateProfileDto>
 ): number {
   const fields = ["address", "phoneNumber", "bio"];
-  const filledFields = fields.filter((field) => !!data[field]).length;
+  const filledFields = fields.filter((field: string) => !!(data as any)[field]).length;
   return (filledFields / fields.length) * 100;
 }

@@ -4,8 +4,8 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const DegreeList = await prisma.DegreeList.findMany();
-    const InstitutionList = await prisma.InstitutionList.findMany();
+    const DegreeList = await prisma.degreeList.findMany();
+    const InstitutionList = await prisma.institutionList.findMany();
     return NextResponse.json({
       DegreeList: DegreeList,
       InstitutionList: InstitutionList,
