@@ -25,7 +25,6 @@ export async function POST(req: Request) {
     // Validate input
     const validatedData = signupSchema.parse(body);
 
-    // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [

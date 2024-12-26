@@ -1,21 +1,23 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import { ChevronDown, ChevronRight, User, Briefcase } from "lucide-react";
 
 type SidebarProps = {
-  setActiveTab: (tab: string) => void;
   setProfessionalActiveSection: (section: string) => void;
   activeTab: string;
   activeSection: string;
+  expandedItems: string[];
+  toggleExpanded: (item: string) => void;
+  completionPercentage: number;
 };
 
 const Sidebar: React.FC<SidebarProps> = ({
-  setActiveTab,
   setProfessionalActiveSection,
   activeTab,
-  activeSection
+  activeSection,
+  expandedItems,
+  toggleExpanded,
+  completionPercentage,
 }) => {
-  const [expandedItems, setExpandedItems] = useState(["personal"]);
-
   const menuItems = useMemo(
     () => [
       {
@@ -46,53 +48,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     []
   );
 
-  const completionPercentage = useMemo(() => {
-    const calculateCompletion = (items) => {
-      const total = items.length;
-      const completed = items.filter((item) => item.completed).length;
-
-      const subItemResults = items
-        .filter((item) => item.subItems)
-        .reduce(
-          (acc, item) => {
-            const subCompletion = calculateCompletion(item.subItems);
-            return {
-              total: acc.total + subCompletion.total,
-              completed: acc.completed + subCompletion.completed,
-            };
-          },
-          { total: 0, completed: 0 }
-        );
-
-      return {
-        total: total + subItemResults.total,
-        completed: completed + subItemResults.completed,
-      };
-    };
-
-    const { total, completed } = calculateCompletion(menuItems);
-    return Math.round((completed / total) * 100);
-  }, [menuItems]);
-
-  const handleMainTabClick = (label: string) => {
-    setActiveTab(label);
-    if (label === "professional") {
-      setExpandedItems(["professional"]);
-      setProfessionalActiveSection("Education");
-    } else {
-      setExpandedItems([]);
-    }
-  };
-
   const handleSectionClick = (section: string) => {
     setProfessionalActiveSection(section);
-  };
-
-
-  const toggleExpanded = (label: string) => {
-    if (activeTab === "professional") {
-      setExpandedItems((prev) => (prev.includes(label) ? [] : [label]));
-    }
   };
 
   return (
@@ -104,10 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div key={item.id} className="select-none">
             <div
               onClick={() => {
-                handleMainTabClick(item.label);
-                if (activeTab === "professional") {
-                  toggleExpanded(item.label);
-                }
+                toggleExpanded(item.label);
               }}
               className={`flex items-center p-3 rounded-lg transition-all cursor-pointer
                 ${

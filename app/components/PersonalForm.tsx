@@ -1,25 +1,17 @@
-"use client";
-
-import { useState } from "react";
-
-export default function PersonalForm() {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    email: "",
-  });
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+interface PersonalFormProps {
+  formData: {
+    name: string;
+    phone: string;
+    address: string;
+    email: string;
   };
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
 
+const PersonalForm: React.FC<PersonalFormProps> = ({
+  formData,
+  handleInputChange,
+}) => {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <div className="space-y-2">
@@ -83,4 +75,6 @@ export default function PersonalForm() {
       </div>
     </div>
   );
-}
+};
+
+export default PersonalForm;

@@ -6,13 +6,8 @@ import Select from "react-select";
 
 interface WorkSectionProps {
   sectionIndex: number;
-  value: {
-    company: { value: string; label: string } | null;
-    position: string;
-    startDate: Date | null;
-    endDate: Date | null;
-  };
-  onChange: (field: string, value: any, sectionIndex: number) => void;
+  value: any;
+  onChange: (seactionIndex: number, field: string, value: any) => void;
 }
 
 export default function WorkSection({

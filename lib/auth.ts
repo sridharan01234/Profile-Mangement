@@ -1,13 +1,6 @@
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
-
-interface JWTPayload {
-  id: string;
-  username: string;
-  email: string;
-  iat: number;
-  exp: number;
-}
+import { JWTPayload } from "@/types";
 
 export async function getUser() {
   const cookieStore = await cookies(); // Await the cookies promise

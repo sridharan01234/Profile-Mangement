@@ -3,10 +3,7 @@ import Select from "react-select";
 
 interface EducationSectionProps {
   sectionIndex: number;
-  value: {
-    degree: { value: string; label: string } | null;
-    institution: { value: string; label: string } | null;
-  };
+  value: any;
   onChange: (sectionIndex: number, field: string, value: any) => void;
 }
 

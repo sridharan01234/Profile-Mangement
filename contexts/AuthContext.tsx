@@ -3,22 +3,20 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-interface JWTPayload {
-  username: string;
-  exp: number;
-}
+import { JWTPayload } from "@/types";
 
 interface AuthContextType {
   user: JWTPayload | null;
   loading: boolean;
   logout: () => Promise<void>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  logout: async () => {},
+  logout: async () => { },
+  setLoading: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -63,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
+    <AuthContext.Provider value={{ user, loading, logout, setLoading }}>
       {children}
     </AuthContext.Provider>
   );
