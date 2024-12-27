@@ -20,7 +20,7 @@ import {
 const calculatePersonalCompletion = (formData: FormData) => {
   const personalFields = ["name", "phone", "address", "email"] as const;
   type PersonalField = (typeof personalFields)[number];
-
+  
   const filledFields = personalFields.filter((field: PersonalField) =>
     Boolean(formData[field]),
   ).length;
@@ -56,7 +56,6 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<string>("");
   const [workSections, setWorkSections] = useState<Experience[]>([]);
   const [educationSections, setEducationSections] = useState<Education[]>([]);
-  const [skillSections] = useState<Skills[]>([]);
   const [expandedItems, setExpandedItems] = useState<string[]>(["personal"]);
   const { user, loading, setLoading } = useAuth();
 
@@ -112,11 +111,7 @@ export default function Dashboard() {
       degree: "",
       institution: "",
     };
-
-    // Update education sections
     setEducationSections((prev) => [...prev, newEducation]);
-
-    // Update form data
     setFormData((prev) => ({
       ...prev,
       education: [...prev.education, newEducation],
