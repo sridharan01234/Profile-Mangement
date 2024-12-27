@@ -19,7 +19,6 @@ export default function WorkSection({
 
   useEffect(() => {
     fetchCompanies();
-    console.log(value);
   }, []);
 
   const fetchCompanies = async () => {

@@ -20,7 +20,7 @@ import {
 const calculatePersonalCompletion = (formData: FormData) => {
   const personalFields = ["name", "phone", "address", "email"] as const;
   type PersonalField = (typeof personalFields)[number];
-  
+
   const filledFields = personalFields.filter((field: PersonalField) =>
     Boolean(formData[field]),
   ).length;
@@ -71,6 +71,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     getProfileData();
+    console.log(formData);
   }, [user]);
 
   const getProfileData = async () => {
@@ -157,7 +158,6 @@ export default function Dashboard() {
     field: string,
     value: FormData,
   ) {
-    console.log(field, value);
     setFormData((prev) => ({
       ...prev,
       experience: prev.experience.map((section, index) =>
@@ -179,6 +179,20 @@ export default function Dashboard() {
       ),
     }));
   }
+
+  const handleSkillChange = (
+    selectedSkills: string[],
+    sectionIndex: number,
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      skills: prev.skills.map((section, index) =>
+        index === sectionIndex
+          ? { ...section, skillSet: selectedSkills }
+          : section,
+      ),
+    }));
+  };
 
   const renderWorkSection = () => (
     <div className="space-y-6">
@@ -216,7 +230,7 @@ export default function Dashboard() {
 
   const renderEducationSection = () => (
     <div className="space-y-6">
-      {educationSections.map((_, index) => (
+      {formData.education.map((education, index) => (
         <div key={index} className="relative border p-4 rounded-lg">
           {index >= 0 && (
             <button
@@ -229,7 +243,7 @@ export default function Dashboard() {
           )}
           <EducationSection
             sectionIndex={index}
-            value={formData.education[index]}
+            value={education}
             onChange={handleEducationChange}
             setLoading={setLoading}
             loading={loading}
@@ -261,27 +275,14 @@ export default function Dashboard() {
     </div>
   );
 
-  const handleSkillChange = (selectedSkills: any[], sectionIndex: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills.map((section, index) =>
-        index === sectionIndex
-          ? { ...section, skillSet: selectedSkills }
-          : section,
-      ),
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (completionPercentages.total !== 100) {
       toast.error("Please complete all the section");
       return;
     }
-    toast.success("Profile Updated succesfully");
-    return;
     try {
-      const response = await fetch("/api/profiles", {
+      const response = await fetch(`api/profiles/${user?.userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -295,9 +296,9 @@ export default function Dashboard() {
       }
 
       const data = await response.json();
-      console.log("Profile created:", data);
+      toast.success("Profile created successfully");
     } catch (error) {
-      console.error("Error:", error);
+      toast.error("Failed to create profile");
     }
   };
 

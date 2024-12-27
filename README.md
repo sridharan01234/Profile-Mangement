@@ -13,26 +13,26 @@ Welcome to the Profile Management system! This project enables users to create, 
 To get started with the project, follow these steps:
 
 1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/sridharan01234/Profile-Management
-    ```
+   ```bash
+   git clone https://github.com/sridharan01234/Profile-Management
+   ```
 2. **Navigate to the project directory**:
-    ```bash
-    cd profile_management
-    ```
+   ```bash
+   cd profile_management
+   ```
 3. **Install the dependencies**:
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 
 ## Usage
 
 To run the project locally:
 
 1. **Start the development server**:
-    ```bash
-    npm start
-    ```
+   ```bash
+   npm start
+   ```
 2. **Open your browser** and go to `http://localhost:3000`.
 
 ## Contributing

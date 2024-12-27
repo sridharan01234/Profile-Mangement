@@ -37,26 +37,22 @@ export interface FormData {
 }
 
 export interface CreateProfileDto {
-  userId: string;
   address?: string;
-  phoneNumber?: string;
+  phone?: string;
   bio?: string;
-  education: {
-    degree: string;
-    institution: string;
-    startDate: Date;
-    endDate?: Date;
-  }[];
-  workHistory: {
-    jobTitle: string;
-    companyName: string;
-    startDate: Date;
-    endDate?: Date;
-    description?: string;
-  }[];
-  skills: {
-    name: string;
-  }[];
+  education: Array<{
+    degree: { label: string };
+    institution: { label: string };
+  }>;
+  experience: Array<{
+    company: string;
+    position: string;
+    startDate: string | Date;
+    endDate?: string | Date | null;
+  }>;
+  skills: Array<{
+    skillSet: Array<{ label: string }>;
+  }>;
 }
 
 export interface JWTPayload {

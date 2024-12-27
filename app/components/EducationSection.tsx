@@ -55,10 +55,10 @@ export default function EducationSection({
           Degree
         </label>
         <Select
-          value={value.degree}
           options={degrees}
+          value={degrees.find((option) => option.value === value.degree)}
           onChange={(selectedOption) =>
-            onChange(sectionIndex, "degree", selectedOption)
+            onChange(sectionIndex, "degree", selectedOption?.value || "")
           }
         />
       </div>
@@ -68,10 +68,12 @@ export default function EducationSection({
           Institution
         </label>
         <Select
-          value={value.institution}
           options={institutions}
+          value={institutions.find(
+            (option) => option.value === value.institution,
+          )}
           onChange={(selectedOption) =>
-            onChange(sectionIndex, "institution", selectedOption)
+            onChange(sectionIndex, "institution", selectedOption?.value || "")
           }
         />
       </div>
