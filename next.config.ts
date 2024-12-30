@@ -10,13 +10,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
-      },
-      {
-        protocol: "http",
-        hostname: "**",
-      },
+        hostname: "*",
+      }
     ],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; img-src 'self' https: data:;",
   },
   cookies: {
     secure: process.env.NODE_ENV === "production",

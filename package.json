@@ -21,6 +21,7 @@
     "@mui/material": "^6.3.0",
     "@mui/x-date-pickers": "^7.23.3",
     "@prisma/client": "^6.1.0",
+    "aws-sdk": "^2.1692.0",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.3",
     "dayjs": "^1.11.13",
@@ -28,6 +29,7 @@
     "jose": "^5.9.6",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "ldrs": "^1.0.2",
     "lucide-react": "^0.469.0",
     "next": "15.1.2",
     "react": "^19.0.0",
@@ -42,6 +44,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/aws-sdk": "^0.0.42",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",

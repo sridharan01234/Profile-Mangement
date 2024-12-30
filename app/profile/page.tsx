@@ -22,7 +22,7 @@ const calculatePersonalCompletion = (formData: FormData) => {
   type PersonalField = (typeof personalFields)[number];
 
   const filledFields = personalFields.filter((field: PersonalField) =>
-    Boolean(formData[field]),
+    Boolean(formData[field])
   ).length;
 
   return Math.round((filledFields / personalFields.length) * 100);
@@ -31,7 +31,7 @@ const calculatePersonalCompletion = (formData: FormData) => {
 const calculateEducationCompletion = (education: Array<Education>) => {
   if (!education.length) return 0;
   const filledEducations = education.filter(
-    (edu) => edu.degree && edu.institution,
+    (edu) => edu.degree && edu.institution
   ).length;
   return Math.round((filledEducations / education.length) * 100);
 };
@@ -39,7 +39,7 @@ const calculateEducationCompletion = (education: Array<Education>) => {
 const calculateWorkCompletion = (experience: Array<Experience>) => {
   if (!experience.length) return 0;
   const filledExperience = experience.filter(
-    (exp) => exp.company && exp.position && exp.startDate && exp.endDate,
+    (exp) => exp.company && exp.position && exp.startDate && exp.endDate
   ).length;
   return Math.round((filledExperience / experience.length) * 100);
 };
@@ -52,16 +52,16 @@ const calculateSkillsCompletion = (skills: Array<Skills>) => {
 };
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<string>("personal");
+  const [activeTab, setActiveTab] = useState<keyof typeof sectionFlow>("personal");
   const [activeSection, setActiveSection] = useState<string>("");
   const [workSections, setWorkSections] = useState<Experience[]>([]);
   const [educationSections, setEducationSections] = useState<Education[]>([]);
-  const [expandedItems, setExpandedItems] = useState<string[]>(["personal"]);
   const { user, loading, setLoading } = useAuth();
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
+    photo: "",
     address: "",
     email: "",
     experience: [{ company: "", position: "", startDate: "", endDate: "" }],
@@ -78,7 +78,7 @@ export default function Dashboard() {
     setLoading(true);
     try {
       if (!user) return;
-      const response = await fetch(`api/profiles/${user.userId}`);
+      const response = await fetch(`api/profile/${user.userId}`);
       const profileData = await response.json();
 
       console.log(profileData);
@@ -144,7 +144,7 @@ export default function Dashboard() {
   );
 
   const handlePersonalFormInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -156,12 +156,12 @@ export default function Dashboard() {
   function handleExperienceChnage(
     sectionIndex: number,
     field: string,
-    value: FormData,
+    value: FormData
   ) {
     setFormData((prev) => ({
       ...prev,
       experience: prev.experience.map((section, index) =>
-        index === sectionIndex ? { ...section, [field]: value } : section,
+        index === sectionIndex ? { ...section, [field]: value } : section
       ),
     }));
   }
@@ -169,27 +169,27 @@ export default function Dashboard() {
   function handleEducationChange(
     sectionIndex: number,
     field: string,
-    value: FormData,
+    value: FormData
   ) {
     console.log(field, value);
     setFormData((prev) => ({
       ...prev,
       education: prev.education.map((section, index) =>
-        index === sectionIndex ? { ...section, [field]: value } : section,
+        index === sectionIndex ? { ...section, [field]: value } : section
       ),
     }));
   }
 
   const handleSkillChange = (
     selectedSkills: string[],
-    sectionIndex: number,
+    sectionIndex: number
   ) => {
     setFormData((prev) => ({
       ...prev,
       skills: prev.skills.map((section, index) =>
         index === sectionIndex
           ? { ...section, skillSet: selectedSkills }
-          : section,
+          : section
       ),
     }));
   };
@@ -282,7 +282,7 @@ export default function Dashboard() {
       return;
     }
     try {
-      const response = await fetch(`api/profiles/${user?.userId}`, {
+      const response = await fetch(`api/profile/${user?.userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -385,7 +385,7 @@ export default function Dashboard() {
       const skills = calculateSkillsCompletion(formData.skills || []);
 
       const total = Math.round(
-        (personal * 30 + education * 25 + work * 30 + skills * 15) / 100,
+        (personal * 30 + education * 25 + work * 30 + skills * 15) / 100
       );
 
       return {
@@ -401,6 +401,11 @@ export default function Dashboard() {
     }
   }, [formData]);
 
+  const sectionFlow: { personal: string[], professional: string[] } = {
+    personal: ["Basic Info"],
+    professional: ["Education", "Work history", "Skills"],
+  };
+
   const moveToNextSection = (e: React.FormEvent) => {
     try {
       if (!validateForm()) {
@@ -408,34 +413,65 @@ export default function Dashboard() {
         return;
       }
 
-      if (activeTab === "personal") {
-        setActiveTab("professional");
-        setActiveSection("Education");
-        toggleExpanded("professional");
+      const currentFlow = sectionFlow[activeTab];
+
+      if (!currentFlow) {
+        console.error("Invalid activeTab:", activeTab);
         return;
       }
 
-      if (activeTab === "professional") {
-        switch (activeSection) {
-          case "Education": {
-            const nextCompletion = completionPercentages.work;
-            setActiveSection("Work history");
-            break;
-          }
-          case "Work history": {
-            const nextCompletion = completionPercentages.skills;
-            setActiveSection("Skills");
-            break;
-          }
-          case "Skills": {
-            setActiveSection("Skills");
-            handleSubmit(e);
-            break;
-          }
+      const currentSectionIndex = currentFlow.indexOf(activeSection);
+
+      if (currentSectionIndex === -1) {
+        setActiveSection(currentFlow[0] || "");
+        return;
+      }
+
+      const nextSection = currentFlow[currentSectionIndex + 1];
+
+      if (nextSection) {
+        setActiveSection(nextSection);
+      } else {
+        if (activeTab === "professional") {
+          handleSubmit(e);
+        } else if (activeTab === "personal") {
+          setActiveTab("professional");
+          setActiveSection(sectionFlow.professional[0] || "");
         }
       }
     } catch (error) {
       console.error("Error in moveToNextSection:", error);
+    }
+  };
+
+  const moveToPreviousSection = () => {
+    try {
+      const currentFlow = sectionFlow[activeTab];
+
+      if (!currentFlow) {
+        console.error("Invalid activeTab:", activeTab);
+        return;
+      }
+
+      const currentSectionIndex = currentFlow.indexOf(activeSection);
+
+      if (currentSectionIndex === -1) {
+        console.error("Invalid activeSection:", activeSection);
+        return;
+      }
+
+      const previousSection = currentFlow[currentSectionIndex - 1];
+
+      if (previousSection) {
+        setActiveSection(previousSection);
+      } else {
+        if (activeTab === "professional") {
+          setActiveTab("personal");
+          setActiveSection(sectionFlow.personal[0] || "");
+        }
+      }
+    } catch (error) {
+      console.error("Error in moveToPreviousSection:", error);
     }
   };
 
@@ -448,97 +484,64 @@ export default function Dashboard() {
     });
   }, [activeTab, activeSection, completionPercentages, formData]);
 
-  const moveToPreviousSection = () => {
-    if (activeTab === "professional") {
-      switch (activeSection) {
-        case "Work history":
-          setActiveSection("Education");
-          break;
-        case "Skills":
-          setActiveSection("Work history");
-          break;
-        case "Education":
-          setActiveTab("personal");
-          setActiveSection("");
-          break;
-        default:
-          break;
-      }
-    } else {
-      setActiveTab("personal");
-      setActiveSection("");
-      toggleExpanded("personal");
-    }
-  };
-
-  const toggleExpanded = (label: string) => {
-    setActiveTab(label);
-    if (label === "professional") {
-      setExpandedItems(["professional"]);
-      setActiveSection("Education");
-    } else {
-      setExpandedItems([]);
-      setExpandedItems((prev) => (prev.includes(label) ? [] : [label]));
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center items-start py-8">
-      <Toaster />
-      <div className="container max-w-6xl mx-auto flex flex-col md:flex-row gap-6 p-4">
-        {/* Sidebar */}
+    <>
+      <div className="space-y-6">
+        <Sidebar
+          activeSection={activeSection}
+          completionPercentage={completionPercentages.total}
+        />
+      </div>
 
-        <div className="space-y-6">
-          <Sidebar
-            setProfessionalActiveSection={setActiveSection}
-            activeTab={activeTab}
-            activeSection={activeSection}
-            expandedItems={expandedItems}
-            toggleExpanded={toggleExpanded}
-            completionPercentage={completionPercentages.total}
-          />
-        </div>
+      <div className="min-h-screen bg-gray-50 flex justify-center items-start py-8">
+        <Toaster />
+        <div className="container max-w-6xl mx-auto flex flex-col md:flex-row gap-6 p-4">
+          {/* Sidebar */}
 
-        {/* Main Content */}
-        <div className="flex-1 max-w-3xl">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-2xl font-bold mb-8">
-              {activeTab === "personal"
-                ? "Personal Information"
-                : "Professional Information"}
-            </h2>
+          {/* Main Content */}
+          <div className="fixed top-0 left-0 w-full h-full bg-gray-100 z-40 flex justify-center items-center">
+            <div className="flex-1 max-w-3xl">
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-2xl font-bold mb-8">
+                  {activeTab === "personal"
+                    ? "Personal Information"
+                    : "Professional Information"}
+                </h2>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {activeTab === "personal"
-                ? renderPersonalForm()
-                : renderProfessionalForm()}
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                  {activeTab === "personal"
+                    ? renderPersonalForm()
+                    : renderProfessionalForm()}
 
-              <div className="flex justify-end gap-4 pt-4">
-                {/* Only show Back button if not on the first screen */}
-                {activeTab !== "personal" && (
-                  <button
-                    type="button"
-                    onClick={moveToPreviousSection}
-                    className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Back
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={moveToNextSection}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {/* Change button text based on section */}
-                  {activeTab === "professional" && activeSection === "Skills"
-                    ? "Submit"
-                    : "Next"}
-                </button>
+                  <div className="flex justify-end gap-4 pt-4">
+                    {/* Only show Back button if not on the first screen */}
+                    {activeTab !== "personal" && (
+                      <button
+                        type="button"
+                        onClick={moveToPreviousSection}
+                        className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Back
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={moveToNextSection}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      {/* Change button text based on section */}
+                      {activeTab === "professional" &&
+                      activeSection === "Skills"
+                        ? "Submit"
+                        : "Next"}
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

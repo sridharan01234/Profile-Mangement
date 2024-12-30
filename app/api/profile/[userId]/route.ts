@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { CreateProfileDto } from "@/types";
 import { NextRequest } from "next/server";
-import { log } from "console";
+import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -37,9 +38,17 @@ export async function GET(
       });
     }
 
+    const photoPath = path.join(process.cwd(), 'uploads/profie', `${params.userId}.jpg`);
+    let photo = null;
+
+    if (fs.existsSync(photoPath)) {
+      photo = fs.readFileSync(photoPath, { encoding: 'base64' });
+    }
+
     const formattedProfile = {
       name: user.name || "",
       phone: profile.phoneNumber || "",
+      photo: photo ? `data:image/jpeg;base64,${photo}` : null,
       address: profile.address || "",
       email: user.email || "",
       experience: profile.workHistory.map((work) => ({
@@ -80,20 +89,23 @@ export async function POST(
   const { userId } = await context.params;
   const data: CreateProfileDto = await request.json();
   try {
-    // Debug log to see incoming date formats
-    console.log("Incoming dates:", {
-      educationDates: data.education.map((edu) => ({})),
-      workDates: data.experience.map((exp) => ({
-        startDate: exp.startDate,
-        endDate: exp.endDate,
-      })),
-    });
 
     const existingProfile = await prisma.profile.findUnique({
       where: { userId },
     });
 
     let profile;
+
+    const photo = data.photo;
+    if (photo) {
+      const photoData = photo.split(",")[1];
+      if (!photoData) {
+        throw new Error("Invalid photo data");
+      }
+      const photoBuffer = Buffer.from(photoData, "base64");
+      const photoPath = await uploadPhoto(photoBuffer, userId);
+      data.photo = photoPath;
+    }
 
     if (existingProfile) {
       profile = await prisma.profile.update({
@@ -116,22 +128,22 @@ export async function POST(
           workHistory: {
             deleteMany: {},
             create: data.experience.map((exp) => {
-              const startDate = formatDate(exp.startDate);
-              const endDate = formatDate(exp.endDate);
-
-              if (!startDate) {
-                throw new Error(
-                  `Invalid start date for work experience: ${exp.position}`,
-                );
-              }
-
-              return {
-                companyName: exp.company,
-                jobTitle: exp.position,
-                startDate,
-                endDate,
-              };
-            }),
+                  const startDate = formatDate(exp.startDate);
+                  const endDate = formatDate(exp.endDate ?? null);
+    
+                  if (!startDate) {
+                    throw new Error(
+                      `Invalid start date for work experience: ${exp.position}`,
+                    );
+                  }
+    
+                  return {
+                    companyName: exp.company,
+                    jobTitle: exp.position,
+                    startDate,
+                    endDate,
+                  };
+                }),
           },
           skills: {
             deleteMany: {},
@@ -168,7 +180,7 @@ export async function POST(
           workHistory: {
             create: data.experience.map((exp) => {
               const startDate = formatDate(exp.startDate);
-              const endDate = formatDate(exp.endDate);
+              const endDate = formatDate(exp.endDate ?? null);
 
               if (!startDate) {
                 throw new Error(
@@ -243,3 +255,21 @@ const formatDate = (date: Date | null | string): Date | null => {
     return null;
   }
 };
+
+const uploadPhoto = async (photo: Buffer, userId: string) => {
+  const uploadDir = path.join(process.cwd(), 'uploads/profie');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  const filePath = path.join(uploadDir, `${userId}.jpg`);
+
+  try {
+    fs.writeFileSync(filePath, photo);
+    return `/uploads/${userId}.jpg`;
+  } catch (error) {
+    console.error("Error saving photo locally:", error);
+    throw new Error("Failed to save photo");
+  }
+};
+

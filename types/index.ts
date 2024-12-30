@@ -29,6 +29,7 @@ export interface Skills {
 export interface FormData {
   name: string;
   phone: string;
+  photo?: string;
   address: string;
   email: string;
   experience: Array<Experience>;
@@ -41,18 +42,20 @@ export interface CreateProfileDto {
   phone?: string;
   bio?: string;
   education: Array<{
-    degree: { label: string };
-    institution: { label: string };
+    degree: string;
+    institution: string;
   }>;
   experience: Array<{
     company: string;
     position: string;
     startDate: string | Date;
     endDate?: string | Date | null;
+    description?: string;
   }>;
   skills: Array<{
     skillSet: Array<{ label: string }>;
   }>;
+  photo?: string;
 }
 
 export interface JWTPayload {
@@ -101,6 +104,7 @@ export interface PersonalFormProps {
     phone: string;
     address: string;
     email: string;
+    photo?: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   loading: boolean;
