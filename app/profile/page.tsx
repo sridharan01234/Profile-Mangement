@@ -16,6 +16,7 @@ import {
   Experience,
   Skills,
 } from "@/types";
+import { bouncy } from "ldrs";
 
 const calculatePersonalCompletion = (formData: FormData) => {
   const personalFields = ["name", "phone", "address", "email"] as const;
@@ -58,6 +59,7 @@ export default function Dashboard() {
   const [workSections, setWorkSections] = useState<Experience[]>([]);
   const [educationSections, setEducationSections] = useState<Education[]>([]);
   const { user, loading, setLoading } = useAuth();
+  bouncy.register();
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -279,9 +281,10 @@ export default function Dashboard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (completionPercentages.total !== 100) {
-      toast.error("Please complete all the section");
+      toast.error("Please complete all the sections");
       return;
     }
+    setLoading(true);
     try {
       const response = await fetch(`api/profile/${user?.userId}`, {
         method: "POST",
@@ -296,10 +299,11 @@ export default function Dashboard() {
         throw new Error(errorData.error || "Failed to create profile");
       }
 
-      const data = await response.json();
       toast.success("Profile created successfully");
     } catch (error) {
       toast.error("Failed to create profile");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -514,29 +518,31 @@ export default function Dashboard() {
                     ? renderPersonalForm()
                     : renderProfessionalForm()}
 
-                  <div className="flex justify-end gap-4 pt-4">
-                    {/* Only show Back button if not on the first screen */}
-                    {activeTab !== "personal" && (
+                  {!loading && (
+                    <div className="flex justify-end gap-4 pt-4 ">
+                      {/* Only show Back button if not on the first screen */}
+                      {activeTab !== "personal" && (
+                        <button
+                          type="button"
+                          onClick={moveToPreviousSection}
+                          className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          Back
+                        </button>
+                      )}
                       <button
                         type="button"
-                        onClick={moveToPreviousSection}
-                        className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                        onClick={moveToNextSection}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       >
-                        Back
+                        {/* Change button text based on section */}
+                        {activeTab === "professional" &&
+                        activeSection === "Skills"
+                          ? "Submit"
+                          : "Next"}
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={moveToNextSection}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      {/* Change button text based on section */}
-                      {activeTab === "professional" &&
-                      activeSection === "Skills"
-                        ? "Submit"
-                        : "Next"}
-                    </button>
-                  </div>
+                    </div>
+                  )}
                 </form>
               </div>
             </div>
