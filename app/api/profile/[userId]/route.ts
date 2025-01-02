@@ -281,14 +281,13 @@ const uploadPhoto = async (photo: Buffer, userId: string) => {
 };
 
 const sendEmailNotification = async (userId: string, profile: any) => {
-  console.log(profile);
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
     auth: {
       user: "sridharan01234@gmail.com",
-      pass: "btpmdpmzbqnvjirq",
+      pass: process.env.SMTP_PASS,
     },
   });
 
