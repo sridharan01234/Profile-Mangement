@@ -43,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -65,19 +65,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                   {item.subItems.map((subItem) => (
                     <div key={subItem.id} className="flex items-center">
                       {activeSection === subItem.label ? (
-                      <ChevronDown className="text-blue-600" />
+                        <ChevronDown className="text-blue-600" />
                       ) : (
-                      <ChevronRight className="text-gray-600" />
+                        <ChevronRight className="text-gray-600" />
                       )}
                       <span
-                      className={`ml-2 transition-colors
+                        className={`ml-2 transition-colors
                         ${
                           activeSection === subItem.label
-                          ? "text-blue-600 font-medium"
-                          : "text-gray-600"
+                            ? "text-blue-600 font-medium"
+                            : "text-gray-600"
                         }`}
                       >
-                      {subItem.label}
+                        {subItem.label}
                       </span>
                     </div>
                   ))}

@@ -6,10 +6,12 @@ export async function GET() {
   try {
     const DegreeList = await prisma.degreeList.findMany();
     const InstitutionList = await prisma.institutionList.findMany();
-    return NextResponse.json({
-      DegreeList: DegreeList,
-      InstitutionList: InstitutionList,
+    const response = NextResponse.json({
+      DegreeList,
+      InstitutionList,
     });
+    response.headers.set("Cache-Control", "public, max-age=3600");
+    return response;
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json(

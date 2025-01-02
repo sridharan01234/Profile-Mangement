@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { CreateProfileDto } from "@/types";
 import { NextRequest } from "next/server";
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
+import nodemailer from "nodemailer";
 
 const prisma = new PrismaClient();
 
@@ -38,11 +39,15 @@ export async function GET(
       });
     }
 
-    const photoPath = path.join(process.cwd(), 'uploads/profie', `${params.userId}.jpg`);
+    const photoPath = path.join(
+      process.cwd(),
+      "uploads/profie",
+      `${params.userId}.jpg`,
+    );
     let photo = null;
 
     if (fs.existsSync(photoPath)) {
-      photo = fs.readFileSync(photoPath, { encoding: 'base64' });
+      photo = fs.readFileSync(photoPath, { encoding: "base64" });
     }
 
     const formattedProfile = {
@@ -89,7 +94,6 @@ export async function POST(
   const { userId } = await context.params;
   const data: CreateProfileDto = await request.json();
   try {
-
     const existingProfile = await prisma.profile.findUnique({
       where: { userId },
     });
@@ -128,22 +132,22 @@ export async function POST(
           workHistory: {
             deleteMany: {},
             create: data.experience.map((exp) => {
-                  const startDate = formatDate(exp.startDate);
-                  const endDate = formatDate(exp.endDate ?? null);
-    
-                  if (!startDate) {
-                    throw new Error(
-                      `Invalid start date for work experience: ${exp.position}`,
-                    );
-                  }
-    
-                  return {
-                    companyName: exp.company,
-                    jobTitle: exp.position,
-                    startDate,
-                    endDate,
-                  };
-                }),
+              const startDate = formatDate(exp.startDate);
+              const endDate = formatDate(exp.endDate ?? null);
+
+              if (!startDate) {
+                throw new Error(
+                  `Invalid start date for work experience: ${exp.position}`,
+                );
+              }
+
+              return {
+                companyName: exp.company,
+                jobTitle: exp.position,
+                startDate,
+                endDate,
+              };
+            }),
           },
           skills: {
             deleteMany: {},
@@ -213,6 +217,9 @@ export async function POST(
       });
     }
 
+    // Send email notification
+    await sendEmailNotification(userId, data);
+
     return NextResponse.json(profile);
   } catch (error) {
     console.error("Profile operation failed:", {
@@ -257,7 +264,7 @@ const formatDate = (date: Date | null | string): Date | null => {
 };
 
 const uploadPhoto = async (photo: Buffer, userId: string) => {
-  const uploadDir = path.join(process.cwd(), 'uploads/profie');
+  const uploadDir = path.join(process.cwd(), "uploads/profie");
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
@@ -273,3 +280,30 @@ const uploadPhoto = async (photo: Buffer, userId: string) => {
   }
 };
 
+const sendEmailNotification = async (userId: string, profile: any) => {
+  console.log(profile);
+  let transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "sridharan01234@gmail.com",
+      pass: "btpmdpmzbqnvjirq",
+    },
+  });
+
+  let mailOptions = {
+    from: '"Profile Management" sridharan01234@gmail.com',
+    to: profile.email,
+    subject: "Profile Updated",
+    text: `Hello, your profile has been updated successfully.`,
+    html: `<b>Hello, your profile has been updated successfully.</b>`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Email notification sent to user:", userId);
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};

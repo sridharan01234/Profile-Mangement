@@ -12,6 +12,7 @@ export async function GET() {
     status: 200,
     headers: {
       "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=3600",
     },
   });
 }

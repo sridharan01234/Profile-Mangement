@@ -6,7 +6,6 @@ const PersonalForm: React.FC<PersonalFormProps> = ({
   handleInputChange,
   loading,
 }) => {
-  
   if (loading) {
     return (
       <div className="flex items-center justify-center transition-opacity duration-500">

@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "*",
-      }
+      },
     ],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; img-src 'self' https: data:;",
