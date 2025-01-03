@@ -218,7 +218,7 @@ export async function POST(
     }
 
     // Send email notification
-    //await sendEmailNotification(userId, data);
+    await sendEmailNotification(userId, data);
 
     return NextResponse.json(profile);
   } catch (error) {
@@ -264,7 +264,7 @@ const formatDate = (date: Date | null | string): Date | null => {
 };
 
 const uploadPhoto = async (photo: Buffer, userId: string) => {
-  const uploadDir = path.join(process.cwd(), "uploads/profie");
+  const uploadDir = path.join(process.cwd(), "public/profile");
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
@@ -286,7 +286,7 @@ const sendEmailNotification = async (userId: string, profile: any) => {
     port: 587,
     secure: false,
     auth: {
-      user: "sridharan01234@gmail.com",
+      user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
   });

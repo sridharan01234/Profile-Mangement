@@ -1,10 +1,14 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function HomePage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const [profilePicture, setProfilePicture] = useState(true);
 
   if (loading) {
     return (
@@ -28,18 +32,38 @@ export default function HomePage() {
                   <span className="text-gray-700">
                     Welcome, {user.username}!
                   </span>
-                  <button
-                    onClick={async () => {
-                      await fetch("/api/auth/logout", {
-                        method: "POST",
-                        credentials: "include",
-                      });
-                      router.push("/login");
-                    }}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Logout
-                  </button>
+                  <div className="relative">
+                    <Image
+                      src={`/profile/${user.userId}.jpg`}
+                      alt="Profile picture"
+                      className="w-10 h-10 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500 cursor-pointer"
+                      width={60}
+                      height={50}
+                      onClick={() => setProfilePicture(!profilePicture)}
+                    />
+                    {profilePicture && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                        <Link
+                          href="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          View Profile
+                        </Link>
+                        <button
+                          onClick={async () => {
+                            await fetch("/api/auth/logout", {
+                              method: "POST",
+                              credentials: "include",
+                            });
+                            router.push("/login");
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Logout
+                        </button>{" "}
+                      </div>
+                    )}
+                  </div>{" "}
                 </div>
               )}
             </div>
@@ -66,28 +90,6 @@ export default function HomePage() {
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
                   Manage your personal information and preferences
-                </p>
-              </button>
-
-              <button
-                onClick={() => router.push("/profile/education")}
-                className="bg-white p-6 rounded-lg shadow-sm border hover:border-blue-500 transition-colors"
-              >
-                <h3 className="text-lg font-medium text-gray-900">Education</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Add or update your educational background
-                </p>
-              </button>
-
-              <button
-                onClick={() => router.push("/profile/experience")}
-                className="bg-white p-6 rounded-lg shadow-sm border hover:border-blue-500 transition-colors"
-              >
-                <h3 className="text-lg font-medium text-gray-900">
-                  Experience
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Manage your work experience and skills
                 </p>
               </button>
             </div>
