@@ -16,7 +16,6 @@ import {
   Experience,
   Skills,
 } from "@/types";
-import { bouncy } from "ldrs";
 
 const calculatePersonalCompletion = (formData: FormData) => {
   const personalFields = ["name", "phone", "address", "email"] as const;
@@ -59,7 +58,6 @@ export default function Dashboard() {
   const [workSections, setWorkSections] = useState<Experience[]>([]);
   const [educationSections, setEducationSections] = useState<Education[]>([]);
   const { user, loading, setLoading } = useAuth();
-  bouncy.register();
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
