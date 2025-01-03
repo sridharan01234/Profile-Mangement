@@ -1,4 +1,3 @@
-// lib/jwt.ts
 import jwt from "jsonwebtoken";
 
 if (!process.env.JWT_SECRET) {
