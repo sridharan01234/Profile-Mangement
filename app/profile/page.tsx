@@ -23,7 +23,7 @@ const calculatePersonalCompletion = (formData: FormData) => {
   type PersonalField = (typeof personalFields)[number];
 
   const filledFields = personalFields.filter((field: PersonalField) =>
-    Boolean(formData[field])
+    Boolean(formData[field]),
   ).length;
 
   return Math.round((filledFields / personalFields.length) * 100);
@@ -32,15 +32,66 @@ const calculatePersonalCompletion = (formData: FormData) => {
 const calculateEducationCompletion = (education: Array<Education>) => {
   if (!education.length) return 0;
   const filledEducations = education.filter(
-    (edu) => edu.degree && edu.institution
+    (edu) => edu.degree && edu.institution,
   ).length;
   return Math.round((filledEducations / education.length) * 100);
+};
+
+const createPdf = async (formData: FormData) => {
+  var data = formData;
+
+  var response = await fetch("/api/profile/education").then((res) =>
+    res.json(),
+  );
+
+  const degreeList = response.DegreeList;
+
+  data.education = data.education.map((edu) => {
+    const degree = degreeList.find((degree: any) => degree.id === edu.degree);
+    return {
+      ...edu,
+      degree: degree ? degree.name : edu.degree,
+    };
+  });
+
+  const InstitutionList = response.InstitutionList;
+
+  data.education = data.education.map((edu) => {
+    const institution = InstitutionList.find(
+      (institution: any) => institution.id === edu.institution,
+    );
+    return {
+      ...edu,
+      institution: institution ? institution.name : edu.institution,
+    };
+  });
+
+  const companyList = await fetch("/api/profile/work").then((res) =>
+    res.json(),
+  );
+
+  data.experience = data.experience.map((exp) => {
+    const company = companyList.find(
+      (company: any) => company.id === exp.company,
+    );
+    return {
+      ...exp,
+      company: company ? company.name : exp.company,
+    };
+  });
+
+  data.skills = data.skills.map((skill) => ({
+    ...skill,
+    skillSet: skill.skillSet.map((s: any) => s.label),
+  }));
+
+  downloadAsPDF(data);
 };
 
 const calculateWorkCompletion = (experience: Array<Experience>) => {
   if (!experience.length) return 0;
   const filledExperience = experience.filter(
-    (exp) => exp.company && exp.position && exp.startDate && exp.endDate
+    (exp) => exp.company && exp.position && exp.startDate && exp.endDate,
   ).length;
   return Math.round((filledExperience / experience.length) * 100);
 };
@@ -154,7 +205,7 @@ export default function Dashboard() {
   );
 
   const handlePersonalFormInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -166,12 +217,12 @@ export default function Dashboard() {
   function handleExperienceChnage(
     sectionIndex: number,
     field: string,
-    value: FormData
+    value: FormData,
   ) {
     setFormData((prev) => ({
       ...prev,
       experience: prev.experience.map((section, index) =>
-        index === sectionIndex ? { ...section, [field]: value } : section
+        index === sectionIndex ? { ...section, [field]: value } : section,
       ),
     }));
   }
@@ -179,27 +230,27 @@ export default function Dashboard() {
   function handleEducationChange(
     sectionIndex: number,
     field: string,
-    value: FormData
+    value: FormData,
   ) {
     console.log(field, value);
     setFormData((prev) => ({
       ...prev,
       education: prev.education.map((section, index) =>
-        index === sectionIndex ? { ...section, [field]: value } : section
+        index === sectionIndex ? { ...section, [field]: value } : section,
       ),
     }));
   }
 
   const handleSkillChange = (
     selectedSkills: string[],
-    sectionIndex: number
+    sectionIndex: number,
   ) => {
     setFormData((prev) => ({
       ...prev,
       skills: prev.skills.map((section, index) =>
         index === sectionIndex
           ? { ...section, skillSet: selectedSkills }
-          : section
+          : section,
       ),
     }));
   };
@@ -397,7 +448,7 @@ export default function Dashboard() {
       const skills = calculateSkillsCompletion(formData.skills || []);
 
       const total = Math.round(
-        (personal * 30 + education * 25 + work * 30 + skills * 15) / 100
+        (personal * 30 + education * 25 + work * 30 + skills * 15) / 100,
       );
 
       return {
@@ -542,9 +593,7 @@ export default function Dashboard() {
                         activeSection == "Skills" && (
                           <button
                             type="button"
-                            onClick={async () =>
-                              downloadAsPDF(await fetchProfileData())
-                            }
+                            onClick={async () => createPdf(formData)}
                             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                           >
                             Download as PDF

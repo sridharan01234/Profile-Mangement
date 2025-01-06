@@ -75,11 +75,9 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errorMessage = error.errors.length > 0 ? error.errors[0]?.message : "Invalid input";
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 400 },
-      );
+      const errorMessage =
+        error.errors.length > 0 ? error.errors[0]?.message : "Invalid input";
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
     console.error("Signup error:", error);

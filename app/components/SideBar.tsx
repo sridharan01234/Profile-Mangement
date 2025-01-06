@@ -43,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
     ],
-    []
+    [],
   );
 
   return (
