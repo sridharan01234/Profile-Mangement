@@ -1,4 +1,3 @@
-// contexts/AuthContext.tsx
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
@@ -15,7 +14,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  logout: async () => { },
+  logout: async () => {},
   setLoading: () => {},
 });
 

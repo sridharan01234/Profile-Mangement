@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
 import Select from "react-select";
-
-interface EducationSectionProps {
-  sectionIndex: number;
-  value: any;
-  onChange: (sectionIndex: number, field: string, value: any) => void;
-}
+import { EducationSectionProps, selectInput } from "@/types";
 
 export default function EducationSection({
   sectionIndex,
   value,
   onChange,
+  loading,
+  setLoading,
 }: EducationSectionProps) {
   const [degrees, setDegrees] = useState([]);
   const [institutions, setInstitutions] = useState([]);
@@ -20,23 +17,36 @@ export default function EducationSection({
   }, []);
 
   const fetchEducationData = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/profile/education");
       const data = await response.json();
-      const degreeOptions = data.DegreeList.map((degree) => ({
+      const degreeOptions = data.DegreeList.map((degree: selectInput) => ({
         value: degree.id,
         label: degree.name,
       }));
-      const institutionOptions = data.InstitutionList.map((institution) => ({
-        value: institution.id,
-        label: institution.name,
-      }));
+      const institutionOptions = data.InstitutionList.map(
+        (institution: selectInput) => ({
+          value: institution.id,
+          label: institution.name,
+        }),
+      );
       setDegrees(degreeOptions);
       setInstitutions(institutionOptions);
     } catch (error) {
       console.error("Error fetching education data:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -45,10 +55,12 @@ export default function EducationSection({
           Degree
         </label>
         <Select
-          value={value.degree}
           options={degrees}
-          onChange={(selectedOption) =>
-            onChange(sectionIndex, "degree", selectedOption)
+          value={degrees.find(
+            (option: { value: string }) => option.value === value.degree,
+          )}
+          onChange={(selectedOption: { value: string } | null) =>
+            onChange(sectionIndex, "degree", selectedOption?.value || "")
           }
         />
       </div>
@@ -58,10 +70,12 @@ export default function EducationSection({
           Institution
         </label>
         <Select
-          value={value.institution}
           options={institutions}
-          onChange={(selectedOption) =>
-            onChange(sectionIndex, "institution", selectedOption)
+          value={institutions.find(
+            (option: { value: string }) => option.value === value.institution,
+          )}
+          onChange={(selectedOption: { value: string } | null) =>
+            onChange(sectionIndex, "institution", selectedOption?.value || "")
           }
         />
       </div>

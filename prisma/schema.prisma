@@ -1,105 +1,106 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String    @id @default(cuid())
-  name         String
-  email        String    @unique
-  username     String    @unique
-  password     String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  profile      Profile?
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  name      String?
+  username  String?  @unique
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  profile   Profile?
 }
 
 model Profile {
-  id                    String       @id @default(cuid())
-  // Personal Information (30%)
-  address              String?
-  phoneNumber          String?
-  bio                  String?      @db.Text
-  
-  // Relations
+  id                  String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId              String       @unique @db.ObjectId
   user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId              String       @unique
+  bio                 String?
+  avatar              String?
+  address             String?
+  phoneNumber         String?
+  dateOfBirth         DateTime?
+  personalInfoComplete Float?
+  educationComplete    Float?
+  workHistoryComplete  Float?
+  skillsComplete      Float?
+  totalComplete       Float?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
   education           Education[]
   workHistory         WorkHistory[]
   skills              Skill[]
-  
-  // Completion tracking
-  personalInfoComplete    Float    @default(0)
-  educationComplete      Float    @default(0)
-  workHistoryComplete    Float    @default(0)
-  skillsComplete         Float    @default(0)
-  totalComplete          Float    @default(0)
-  
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
 }
 
 model Education {
-  id            String    @id @default(cuid())
-  degree        String
-  institution   String
-  startDate     DateTime
-  endDate       DateTime?
-  profile       Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  profileId     String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  degree       String
+  institution  String
+  startDate    DateTime
+  endDate      DateTime?
+  profileId    String    @db.ObjectId
+  profile      Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model WorkHistory {
-  id            String    @id @default(cuid())
-  jobTitle      String
-  companyName   String
-  startDate     DateTime
-  endDate       DateTime?
-  description   String?   @db.Text
-  profile       Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  profileId     String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  jobTitle    String
+  companyName String
+  startDate   DateTime
+  endDate     DateTime?
+  description String?
+  profileId   String    @db.ObjectId
+  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Skill {
-  id            String    @id @default(cuid())
-  name          String
-  profile       Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  profileId     String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  profileId String   @db.ObjectId
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-// Autocomplete support tables
 model DegreeList {
-  id     String @id @default(cuid())
-  name   String @unique
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model InstitutionList {
-  id     String @id @default(cuid())
-  name   String @unique
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CompanyList {
-  id     String @id @default(cuid())
-  name   String @unique
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SkillList {
-  id     String @id @default(cuid())
-  name   String @unique
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

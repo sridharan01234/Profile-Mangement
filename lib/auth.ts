@@ -13,7 +13,7 @@ export async function getUser() {
   try {
     const verified = await jwtVerify(
       token.value,
-      new TextEncoder().encode(process.env.JWT_SECRET)
+      new TextEncoder().encode(process.env.JWT_SECRET),
     );
     return verified.payload as unknown as JWTPayload;
   } catch (error) {

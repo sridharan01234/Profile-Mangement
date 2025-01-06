@@ -2,20 +2,12 @@ import React, { useMemo } from "react";
 import { ChevronDown, ChevronRight, User, Briefcase } from "lucide-react";
 
 type SidebarProps = {
-  setProfessionalActiveSection: (section: string) => void;
-  activeTab: string;
   activeSection: string;
-  expandedItems: string[];
-  toggleExpanded: (item: string) => void;
   completionPercentage: number;
 };
 
 const Sidebar: React.FC<SidebarProps> = ({
-  setProfessionalActiveSection,
-  activeTab,
   activeSection,
-  expandedItems,
-  toggleExpanded,
   completionPercentage,
 }) => {
   const menuItems = useMemo(
@@ -23,14 +15,20 @@ const Sidebar: React.FC<SidebarProps> = ({
       {
         id: 1,
         label: "personal",
-        icon: <User className="w-5 h-5" />,
         completed: false,
-        percetage: 30,
+        percentage: 30,
+        subItems: [
+          {
+            id: "basic",
+            label: "Basic Info",
+            completed: false,
+            percentage: 30,
+          },
+        ],
       },
       {
         id: 2,
         label: "professional",
-        icon: <Briefcase className="w-5 h-5" />,
         completed: false,
         percentage: 70,
         subItems: [
@@ -45,124 +43,73 @@ const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
     ],
-    []
+    [],
   );
 
-  const handleSectionClick = (section: string) => {
-    setProfessionalActiveSection(section);
-  };
-
   return (
-    <div className="w-64 p-4 bg-white rounded-lg shadow-lg">
-      <h2 className="text-xl font-bold mb-6">General Menu</h2>
-
-      <div className="space-y-2">
-        {menuItems.map((item) => (
-          <div key={item.id} className="select-none">
-            <div
-              onClick={() => {
-                toggleExpanded(item.label);
-              }}
-              className={`flex items-center p-3 rounded-lg transition-all cursor-pointer
-                ${
-                  activeTab === item.label
-                    ? "bg-blue-100"
-                    : expandedItems.includes(item.label)
-                    ? "bg-blue-50"
-                    : "hover:bg-gray-50"
-                }`}
-            >
-              <span
-                className={`mr-3 ${
-                  activeTab === item.label
-                    ? "text-blue-600"
-                    : expandedItems.includes(item.label)
-                    ? "text-blue-500"
-                    : "text-gray-500"
-                }`}
-              >
-                {item.icon}
-              </span>
-              <span
-                className={`flex-grow ${
-                  activeTab === item.label
-                    ? "text-blue-700 font-medium"
-                    : expandedItems.includes(item.label)
-                    ? "text-blue-600"
-                    : "text-gray-700"
-                }`}
-              >
-                {item.label}
-              </span>
-              {item.subItems && (
-                <span className="text-gray-400">
-                  {expandedItems.includes(item.label) ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4" />
-                  )}
-                </span>
-              )}
-            </div>
-
-            {item.subItems && expandedItems.includes(item.label) && (
-              <div className="ml-6 mt-2">
-                {item.subItems.map((subItem, subIndex) => (
-                  <div key={subItem.id} className="relative">
-                    {subIndex < item.subItems.length - 1 && (
-                      <div
-                        style={{ height: "60px" }}
-                        className="absolute h-full left-[0.25rem] top-0 w-0.5 bg-gray-200"
-                      />
-                    )}
-
-                    <div className="flex items-center py-2">
-                      <div
-                        className={`w-2.5 h-2.5 rounded-full z-10 transition-colors
-                          ${subItem.completed ? "bg-blue-500" : "bg-gray-200"}
-                          ${
-                            activeSection === subItem.label
-                              ? "ring-2 ring-blue-200"
-                              : ""
-                          }`}
-                      />
-                      <button
-                        onClick={() => handleSectionClick(subItem.label)}
-                        className={`ml-4 hover:text-blue-600 transition-colors
-                          ${
-                            activeSection === subItem.label
-                              ? "text-blue-600 font-medium"
-                              : "text-gray-600"
-                          }`}
-                      >
-                        {subItem.label}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-        <div className="relative pt-1">
-          <div className="flex mb-2 items-center justify-between">
-            <div>
-              <span className="text-4xl font-semibold inline-block text-blue-600">
-                {completionPercentage}%
-              </span>
-              <div className="text-gray-600">Completed</div>
-            </div>
-          </div>
-          <div className="overflow-hidden h-2 text-xs flex rounded bg-blue-100">
-            <div
-              style={{ width: `${completionPercentage}%` }}
-              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 transition-all duration-500"
-            />
+    <div className="w-full fixed top-0 left-0 bg-white shadow-lg z-50">
+      <div className="p-4 flex flex-row items-center">
+        <div className="ml-6 bg-gray-50 rounded-lg flex items-center">
+          <div className="mr-4">
+            <span className="text-2xl font-semibold text-blue-600">
+              {completionPercentage}%
+            </span>
+            <div className="text-gray-600 text-sm">Completed</div>
           </div>
         </div>
+        <div className="ml-n4 flex-1 flex flex-row items-center justify-center space-x-4">
+          {menuItems.map((item) => (
+            <div key={item.id} className="select-none relative">
+              {item.subItems ? (
+                <div className="flex items-center space-x-4">
+                  {item.subItems.map((subItem) => (
+                    <div key={subItem.id} className="flex items-center">
+                      {activeSection === subItem.label ? (
+                        <ChevronDown className="text-blue-600" />
+                      ) : (
+                        <ChevronRight className="text-gray-600" />
+                      )}
+                      <span
+                        className={`ml-2 transition-colors
+                        ${
+                          activeSection === subItem.label
+                            ? "text-blue-600 font-medium"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {subItem.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <div
+                    className={`w-2.5 h-2.5 rounded-full transition-colors
+                      ${item.completed ? "bg-blue-500" : "bg-gray-200"}
+                      ${activeSection === item.label ? "ring-2 ring-blue-200" : ""}`}
+                  />
+                  <button
+                    className={`ml-2 hover:text-blue-600 transition-colors
+                      ${
+                        activeSection === item.label
+                          ? "text-blue-600 font-medium"
+                          : "text-gray-600"
+                      }`}
+                  >
+                    {item.label}
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="relative w-full h-4 bg-gray-200 rounded-full">
+        <div
+          className="absolute top-0 left-0 h-4 bg-blue-600 rounded-full"
+          style={{ width: `${completionPercentage}%` }}
+        />
       </div>
     </div>
   );
