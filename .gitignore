@@ -43,3 +43,6 @@ next-env.d.ts
 # images
 uploads/*
 public/*
+
+# Error Logs
+*.log
