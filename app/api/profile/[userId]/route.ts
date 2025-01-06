@@ -218,7 +218,7 @@ export async function POST(
     }
 
     // Send email notification
-    await sendEmailNotification(userId, data);
+    //await sendEmailNotification(userId, data);
 
     return NextResponse.json(profile);
   } catch (error) {

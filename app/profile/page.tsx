@@ -16,13 +16,14 @@ import {
   Experience,
   Skills,
 } from "@/types";
+import { downloadAsPDF } from "@/lib/pdfGenerator";
 
 const calculatePersonalCompletion = (formData: FormData) => {
   const personalFields = ["name", "phone", "address", "email"] as const;
   type PersonalField = (typeof personalFields)[number];
 
   const filledFields = personalFields.filter((field: PersonalField) =>
-    Boolean(formData[field]),
+    Boolean(formData[field])
   ).length;
 
   return Math.round((filledFields / personalFields.length) * 100);
@@ -31,7 +32,7 @@ const calculatePersonalCompletion = (formData: FormData) => {
 const calculateEducationCompletion = (education: Array<Education>) => {
   if (!education.length) return 0;
   const filledEducations = education.filter(
-    (edu) => edu.degree && edu.institution,
+    (edu) => edu.degree && edu.institution
   ).length;
   return Math.round((filledEducations / education.length) * 100);
 };
@@ -39,7 +40,7 @@ const calculateEducationCompletion = (education: Array<Education>) => {
 const calculateWorkCompletion = (experience: Array<Experience>) => {
   if (!experience.length) return 0;
   const filledExperience = experience.filter(
-    (exp) => exp.company && exp.position && exp.startDate && exp.endDate,
+    (exp) => exp.company && exp.position && exp.startDate && exp.endDate
   ).length;
   return Math.round((filledExperience / experience.length) * 100);
 };
@@ -74,6 +75,14 @@ export default function Dashboard() {
     getProfileData();
     console.log(formData);
   }, [user]);
+
+  const fetchProfileData = async () => {
+    if (!user) return;
+    const response = await fetch(`api/profile/${user.userId}`);
+    const profileData = await response.json();
+
+    return profileData;
+  };
 
   const getProfileData = async () => {
     setLoading(true);
@@ -145,7 +154,7 @@ export default function Dashboard() {
   );
 
   const handlePersonalFormInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -157,12 +166,12 @@ export default function Dashboard() {
   function handleExperienceChnage(
     sectionIndex: number,
     field: string,
-    value: FormData,
+    value: FormData
   ) {
     setFormData((prev) => ({
       ...prev,
       experience: prev.experience.map((section, index) =>
-        index === sectionIndex ? { ...section, [field]: value } : section,
+        index === sectionIndex ? { ...section, [field]: value } : section
       ),
     }));
   }
@@ -170,27 +179,27 @@ export default function Dashboard() {
   function handleEducationChange(
     sectionIndex: number,
     field: string,
-    value: FormData,
+    value: FormData
   ) {
     console.log(field, value);
     setFormData((prev) => ({
       ...prev,
       education: prev.education.map((section, index) =>
-        index === sectionIndex ? { ...section, [field]: value } : section,
+        index === sectionIndex ? { ...section, [field]: value } : section
       ),
     }));
   }
 
   const handleSkillChange = (
     selectedSkills: string[],
-    sectionIndex: number,
+    sectionIndex: number
   ) => {
     setFormData((prev) => ({
       ...prev,
       skills: prev.skills.map((section, index) =>
         index === sectionIndex
           ? { ...section, skillSet: selectedSkills }
-          : section,
+          : section
       ),
     }));
   };
@@ -388,7 +397,7 @@ export default function Dashboard() {
       const skills = calculateSkillsCompletion(formData.skills || []);
 
       const total = Math.round(
-        (personal * 30 + education * 25 + work * 30 + skills * 15) / 100,
+        (personal * 30 + education * 25 + work * 30 + skills * 15) / 100
       );
 
       return {
@@ -528,6 +537,20 @@ export default function Dashboard() {
                           Back
                         </button>
                       )}
+
+                      {completionPercentages.total === 100 &&
+                        activeSection == "Skills" && (
+                          <button
+                            type="button"
+                            onClick={async () =>
+                              downloadAsPDF(await fetchProfileData())
+                            }
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            Download as PDF
+                          </button>
+                        )}
+
                       <button
                         type="button"
                         onClick={moveToNextSection}

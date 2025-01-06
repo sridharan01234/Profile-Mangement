@@ -43,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
     ],
-    [],
+    []
   );
 
   return (
@@ -104,6 +104,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           ))}
         </div>
+      </div>
+      <div className="relative w-full h-4 bg-gray-200 rounded-full">
+        <div
+          className="absolute top-0 left-0 h-4 bg-blue-600 rounded-full"
+          style={{ width: `${completionPercentage}%` }}
+        />
       </div>
     </div>
   );
