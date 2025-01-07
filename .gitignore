@@ -46,3 +46,4 @@ public/*
 
 # Error Logs
 *.log
+.codegpt
