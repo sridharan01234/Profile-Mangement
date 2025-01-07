@@ -5,11 +5,11 @@ import winston from "winston";
 
 // Configure winston logger
 const logger = winston.createLogger({
-  level: 'info',
+  level: "info",
   format: winston.format.json(),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: "error.log", level: "error" }),
   ],
 });
 
@@ -31,7 +31,10 @@ export async function GET() {
       throw new Error("JWT_SECRET is not defined");
     }
 
-    const decoded = jwt.verify(token.value, process.env.JWT_SECRET) as DecodedToken;
+    const decoded = jwt.verify(
+      token.value,
+      process.env.JWT_SECRET,
+    ) as DecodedToken;
 
     return NextResponse.json({
       user: decoded,
@@ -42,7 +45,10 @@ export async function GET() {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     } else {
       logger.error("Authentication error: ", error);
-      return NextResponse.json({ error: "Authentication error" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Authentication error" },
+        { status: 500 },
+      );
     }
   }
 }

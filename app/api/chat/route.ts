@@ -1,4 +1,3 @@
-
 export async function POST(req: Request) {
   try {
     const { messages, model } = await req.json();
@@ -11,7 +10,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: model,
         messages: messages,
-        stream: false
+        stream: false,
       }),
     });
 
@@ -23,14 +22,13 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify(data), {
       headers: { "Content-Type": "application/json" },
     });
-
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Error processing chat request" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }

@@ -40,7 +40,7 @@ const calculateEducationCompletion = (education: Array<Education>) => {
 const createPdf = async (formData: FormData) => {
   var data = {
     ...formData,
-  }
+  };
 
   var response = await fetch("/api/profile/education").then((res) =>
     res.json(),
