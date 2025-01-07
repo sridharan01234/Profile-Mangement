@@ -9,6 +9,43 @@ export default function HomePage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [profilePicture, setProfilePicture] = useState(true);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<
+    { role: string; content: string }[]
+  >([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+
+  const handleChat = async () => {
+    if (!chatInput.trim()) return;
+
+    setIsChatLoading(true);
+    const newMessage = { role: "user", content: chatInput };
+    setChatMessages((prev) => [...prev, newMessage]);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "qwen2.5-coder:1.5b",
+          messages: [...chatMessages, newMessage],
+        }),
+      });
+
+      const data = await response.json();
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.message.content },
+      ]);
+    } catch (error) {
+      console.error("Chat error:", error);
+    } finally {
+      setIsChatLoading(false);
+      setChatInput("");
+    }
+  };
 
   if (loading) {
     return (
@@ -74,24 +111,51 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
-            <p className="text-gray-600">
-              Welcome to your profile management dashboard!
-            </p>
-
-            {/* Quick Actions */}
-            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              <button
-                onClick={() => router.push("/profile")}
-                className="bg-white p-6 rounded-lg shadow-sm border hover:border-blue-500 transition-colors"
-              >
-                <h3 className="text-lg font-medium text-gray-900">
-                  Update Profile
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Manage your personal information and preferences
-                </p>
-              </button>
+            {/* Chatbot Section */}
+            <div className="mt-8 border rounded-lg p-4">
+              <h3 className="text-lg font-medium mb-4">Chat Assistant</h3>
+              <div className="h-96 overflow-y-auto mb-4 p-4 bg-gray-50 rounded">
+                {chatMessages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`mb-2 ${
+                      msg.role === "user" ? "text-right" : "text-left"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block p-2 rounded-lg ${
+                        msg.role === "user"
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-200"
+                      }`}
+                    >
+                      {msg.content}
+                    </span>
+                  </div>
+                ))}
+                {isChatLoading && (
+                  <div className="text-center">
+                    <div className="animate-pulse">Processing...</div>
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleChat()}
+                  placeholder="Type your message..."
+                  className="flex-1 p-2 border rounded"
+                />
+                <button
+                  onClick={handleChat}
+                  disabled={isChatLoading}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
+                >
+                  Send
+                </button>
+              </div>
             </div>
           </div>
         </div>
