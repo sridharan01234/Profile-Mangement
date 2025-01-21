@@ -13,12 +13,22 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ chatMessages }) => {
-  const extractCodeFromMessage = (content: string) => {
-    if (content.includes("```")) {
-      const codeContent = content.split("```")[1];
-      return codeContent ? codeContent.trim() : "";
+const extractCodeFromMessage = (content: string) => {
+  if (content.includes("```")) {
+    const codeContent = content.split("```")[1];
+    if (codeContent) {
+      const lines = codeContent.trim().split("\n");
+      return lines.slice(1).join("\n").trim();
     }
-    return content;
+    return "";
+  }
+  return content;
+};
+
+
+  const extractLanguageFromCode = (content: string): string => {
+    const codeMatch = content.match(/```(\w+)?\n/);
+    return codeMatch?.[1] || "Code";
   };
 
   const formatMessageContent = (content: string) => {
@@ -41,7 +51,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ chatMessages }) => {
           {beforeCode && formatMessageContent(beforeCode)}
           <div className="max-w-2xl">
             <div className="bg-gray-800 text-white p-2 rounded-t-md flex justify-between items-center">
-              <span className="text-sm">Code</span>
+              <span className="text-sm">{extractLanguageFromCode(content)}</span>
               <CopyToClipboard text={extractCodeFromMessage(content)}>
                 <button className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors">
                   Copy

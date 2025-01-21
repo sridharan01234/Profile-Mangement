@@ -32,47 +32,65 @@ export default function HomePage() {
     const newMessage = { role: "user", content: chatInput };
     setChatMessages((prev) => [...prev, newMessage]);
 
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [...chatMessages, newMessage],
-        }),
-      });
+try {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      messages: [...chatMessages, newMessage],
+    }),
+  });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+  if (!response.body) {
+    throw new Error("Response body is null");
+  }
 
-      while (true) {
-        const { done, value } = await reader?.read() || { done: true, value: undefined };
-        if (done) break;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
 
-        const text = decoder.decode(value);
-        const chunks = text.split('\n').filter(Boolean);
+  // Add the initial assistant message
+  setChatMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
-        for (const chunk of chunks) {
-          try {
-            const data = JSON.parse(chunk);
-            setChatMessages((prev) => [...prev, data]);
-          } catch (e) {
-            console.error("Error parsing chunk:", e);
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const text = decoder.decode(value);
+    const chunks = text.split("\n").filter(Boolean);
+
+    for (const chunk of chunks) {
+      try {
+        const data = JSON.parse(chunk);
+        // Update the last message instead of adding a new one
+        setChatMessages((prev) => {
+          const newMessages = [...prev];
+          // Update the last message if it's from the assistant
+          if (
+            newMessages.length > 0 &&
+            newMessages[newMessages.length - 1].role === "assistant"
+          ) {
+            newMessages[newMessages.length - 1] = data;
           }
-        }
+          return newMessages;
+        });
+      } catch (e) {
+        console.error("Error parsing chunk:", e);
       }
-
-    } catch (error) {
-      console.error("Chat error:", error);
-    } finally {
-      setIsChatLoading(false);
-      setChatInput("");
     }
+  }
+} catch (error) {
+  console.error("Chat error:", error);
+} finally {
+  setIsChatLoading(false);
+  setChatInput("");
+}
+
   };
 
   if (loading) {
